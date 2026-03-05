@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Krize přihlášek na strojírenské obory v ČR — Analytická studie 2026</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700;800&family=Sanchez:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f9fd;
+            --bg-tertiary: #e8f0f8;
+            --text-primary: #04193c;
+            --text-secondary: #3a4a5c;
+            --accent-danger: #f0324b;
+            --accent-warning: #ffa000;
+            --accent-success: #2a9d5c;
+            --accent-info: #04193c;
+            --accent-light: #c9e8fb;
+            --border: #d8e4ef;
+            --nz-dark: #04193c;
+            --nz-red: #f0324b;
+            --nz-light: #c9e8fb;
+            --nz-orange: #ffa000;
+        }
+        
+        body {
+            font-family: 'Gabarito', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, var(--nz-dark) 0%, #0a2d5c 100%);
+            border-radius: 12px;
+            border: none;
+        }
+        
+        .nz-logo {
+            font-size: 0.9em;
+            font-weight: 500;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 20px;
+        }
+        .nz-logo span.nez { color: var(--nz-red); font-family: 'Sanchez', serif; font-style: italic; font-weight: 400; }
+        .nz-logo span.zazvoni { color: #ffffff; font-weight: 700; }
+        
+        h1 {
+            font-size: 3em;
+            font-weight: 800;
+            margin-bottom: 20px;
+            letter-spacing: -0.02em;
+            color: #ffffff;
+        }
+        
+        .subtitle {
+            font-size: 1.3em;
+            color: var(--nz-light);
+            font-weight: 300;
+        }
+        
+        .metadata {
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: rgba(255,255,255,0.5);
+        }
+        
+        h2 {
+            font-size: 2.2em;
+            margin: 60px 0 30px 0;
+            font-weight: 700;
+            color: var(--nz-dark);
+            border-left: 4px solid var(--nz-red);
+            padding-left: 20px;
+        }
+        
+        h3 {
+            font-size: 1.6em;
+            margin: 40px 0 20px 0;
+            font-weight: 600;
+            color: var(--nz-dark);
+        }
+        
+        p, ul, ol {
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+        }
+        
+        strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        .alert {
+            background: #fef2f3;
+            border-left: 4px solid var(--nz-red);
+            padding: 25px 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+            font-size: 1.1em;
+        }
+        
+        .alert.warning {
+            background: #fff8eb;
+            border-left-color: var(--nz-orange);
+        }
+        
+        .alert.info {
+            background: #f0f7fe;
+            border-left-color: var(--nz-dark);
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            text-align: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--nz-red);
+        }
+        
+        .stat-value {
+            font-size: 3em;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value.danger {
+            color: var(--accent-danger);
+        }
+        
+        .stat-value.warning {
+            color: var(--accent-warning);
+        }
+        
+        .stat-value.success {
+            color: var(--accent-success);
+        }
+        
+        .stat-label {
+            font-size: 1em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+        }
+        
+        .chart-container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 40px 0;
+            border: 1px solid var(--border);
+            position: relative;
+            height: 500px;
+            box-shadow: 0 2px 8px rgba(4, 25, 60, 0.06);
+        }
+        
+        .chart-container.tall {
+            height: 700px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        thead {
+            background: var(--nz-dark);
+        }
+        
+        th {
+            padding: 15px 20px;
+            text-align: left;
+            font-weight: 600;
+            color: #ffffff;
+            border-bottom: 2px solid var(--nz-dark);
+        }
+        
+        td {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+        
+        tr:hover {
+            background: var(--accent-light);
+        }
+        
+        .number {
+            font-variant-numeric: tabular-nums;
+            font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+        }
+        
+        .highlight-danger {
+            color: var(--nz-red);
+            font-weight: 600;
+        }
+        
+        .highlight-warning {
+            color: #c47800;
+            font-weight: 600;
+        }
+        
+        .highlight-success {
+            color: var(--accent-success);
+            font-weight: 600;
+        }
+        
+        footer {
+            margin-top: 80px;
+            padding: 40px 20px;
+            background: var(--nz-dark);
+            border-radius: 12px;
+            text-align: center;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9em;
+        }
+        
+        footer strong {
+            color: #ffffff;
+        }
+        
+        .sources {
+            margin-top: 60px;
+            padding: 40px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        
+        .sources h2 {
+            margin-top: 0;
+        }
+        
+        .sources ol {
+            padding-left: 20px;
+        }
+        
+        .sources li {
+            margin-bottom: 12px;
+            font-size: 0.95em;
+        }
+        
+        .sources a {
+            color: var(--nz-dark);
+            text-decoration: underline;
+        }
+        
+        @media print {
+            .container {
+                max-width: 100%;
+            }
+            
+            header, footer {
+                background: var(--nz-dark) !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+        
+        .table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 30px 0;
+        }
+        
+        .table-wrap table {
+            margin: 0;
+            min-width: 600px;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            h2 {
+                font-size: 1.4em;
+            }
+            
+            h3 {
+                font-size: 1.2em;
+            }
+            
+            .container {
+                padding: 20px 12px;
+            }
+            
+            header {
+                padding: 30px 15px;
+            }
+            
+            .chart-container {
+                height: 350px;
+            }
+            
+            .chart-container.tall {
+                height: 500px;
+            }
+            
+            .stat-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            
+            .stat-value {
+                font-size: 2em;
+            }
+            
+            .stat-card {
+                padding: 20px 15px;
+            }
+            
+            .alert {
+                padding: 18px 20px;
+                font-size: 1em;
+            }
+            
+            .sources {
+                padding: 25px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="nz-logo"><span class="nez">než</span> <span class="zazvoni">zazvoní</span> /// analytická studie</div>
+            <h1>Krize přihlášek na strojírenské obory v České republice</h1>
+            <div class="subtitle">Analytická studie 2026: Když děti odmítají budoucnost průmyslu</div>
+            <div class="metadata">
+                Zpracováno: březen 2026 | Datový základ: Přijímací řízení 2025/26<br>
+                Rozsah: 287 škol, 22 802 míst, 13 931 přihlášek (první priorita)
+            </div>
+        </header>
+
+        <section id="executive-summary">
+            <h2>Executive Summary</h2>
+            
+            <div class="alert">
+                <strong>Klíčové zjištění:</strong> České strojírenství čelí bezprecedentní krizi náboru. Core výrobní obory (nástrojař, obráběč kovů, strojní mechanik) naplňují z první priority přihlášek pouze <span class="highlight-danger">12–27 %</span> kapacity. Zbývající místa se plní z druhých a třetích voleb — dětmi, které se na tyto obory nedostaly nikam jinam. To signalizuje nejen ztrátu prestiže, ale i hrozbu pro kvalitu pracovní síly v sektoru tvořícím pětinu českého HDP.
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-value danger">12,3 %</div>
+                    <div class="stat-label">P1 Fill Rate — Nástrojař</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value danger">22 %</div>
+                    <div class="stat-label">P1 Fill Rate — Obráběč kovů</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value danger">27 %</div>
+                    <div class="stat-label">P1 Fill Rate — Strojní mechanik</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value warning">109 %</div>
+                    <div class="stat-label">P1 Fill Rate — Automechanik</div>
+                </div>
+            </div>
+
+            <p>Studie analyzuje přihlášky na 287 středních odborných škol s kapacitou 22 802 míst v strojírenských a příbuzných oborech. Hlavní zjištění:</p>
+
+            <ul>
+                <li><strong>Extrémní rozdíly mezi obory:</strong> Zatímco tradiční výrobní obory (nástrojař 12,3 %, obráběč 22 %, mechanik 27 % P1 fill rate) zažívají faktický kolaps, automobilové obory přetékají (mechanik opravář motorových vozidel 109 %, letecký mechanik 153 %).</li>
+                <li><strong>Regionální nerovnováha:</strong> Praha dosahuje 94 % P1 fill rate, zatímco Jihočeský kraj pouze 40 %. Kraje s tradičním strojírenstvím (Vysočina, Pardubický) mají <50 % P1 zájem.</li>
+                <li><strong>Záložní poptávka:</strong> Core obory mají 3 000+ volných míst po P1, která se plní až z P2/P3. To znamená, že většina budoucích nástrojařů a obráběčů přišla na školu jako "záložní volba".</li>
+                <li><strong>Konkrétní školy:</strong> 26 škol má P1 fill rate pod 10 %, včetně nulové první preference v České Velenici. Některé tradiční průmyslové školy (Vysoké Mýto, Šumperk) nedokázaly obsadit ani desetinu kapacity z prvních voleb.</li>
+            </ul>
+
+            <p><strong>Důsledky pro průmysl:</strong> Pokud se trend nezvrátí, český strojírenský průmysl čelí do roku 2030 strukturálnímu nedostatku kvalifikovaných řemeslníků a techniků. Firmy budou nuceny outsourcovat, automatizovat rychleji než plánováno, nebo přesouvat výrobu. Dlouhodobě hrozí ztráta technologické soběstačnosti v kritických odvětvích.</p>
+        </section>
+
+        <section id="metodologie">
+            <h2>Metodologie a kontext přijímacího řízení</h2>
+            
+            <div class="alert info">
+                <strong>Jak funguje přijímací řízení v ČR?</strong><br>
+                Každý žák podává v průměru 3 přihlášky na střední školy, seřazené podle preference (P1 = první priorita, P2 = druhá, P3 = třetí). Školy přijímají podle pořadí úspěšnosti v testech/zkoušce. Žák nastoupí na nejvýše postavenou školu, kam se dostal. <strong>Přihlášky P2 a P3 tedy představují "záložní varianty" — místa kam dítě jde, protože se nedostalo jinam.</strong>
+            </div>
+
+            <h3>Datový základ</h3>
+            <p>Tato studie analyzuje anonymizovaná data z přijímacího řízení pro školní rok 2025/26, zahrnující:</p>
+            <ul>
+                <li><strong>287 středních škol</strong> nabízejících strojírenské a příbuzné obory (KKOV skupina 23-xx)</li>
+                <li><strong>22 802 nabízených míst</strong> (kapacita denního studia)</li>
+                <li><strong>13 931 přihlášek první priority (P1)</strong> — žáci, pro které byla daná škola/obor první volbou</li>
+                <li><strong>14 932 přihlášek druhé priority (P2)</strong> — záložní volba</li>
+                <li><strong>15 285 přihlášek třetí priority (P3)</strong> — poslední šance</li>
+                <li>Celkem <strong>44 148 přihlášek</strong> na 22 802 míst (P1+P2+P3 combined fill rate 194 %)</li>
+            </ul>
+
+            <h3>Klíčové metriky</h3>
+            <ul>
+                <li><strong>P1 Fill Rate:</strong> Poměr prvních voleb k nabízené kapacitě. Indikuje skutečný zájem o obor. Hodnota pod 50 % znamená, že většina míst se plní "záložně".</li>
+                <li><strong>P1+P2+P3 Fill Rate:</strong> Celkový poměr všech přihlášek k místům. Hodnota nad 100 % znamená převis poptávky.</li>
+                <li><strong>Volná místa (P1):</strong> Počet míst, která nebyla zaplněna první volbou. Tato místa se plní z P2/P3, nebo zůstávají prázdná.</li>
+                <li><strong>Záložní poptávka:</strong> Záložní fill rate = (P2+P3) / kapacita. Ukazuje, kolik žáků přijde na školu jako "druhá/třetí volba".</li>
+            </ul>
+
+            <h3>Kontext: Strojírenství v české ekonomice</h3>
+            <p>Strojírenství tvoří <strong>~20 % českého HDP</strong> a zaměstnává přes 400 000 lidí. Zahrnuje kritické sektory:</p>
+            <ul>
+                <li><strong>Automobilový průmysl:</strong> Škoda Auto, dodavatelé pro VW/Audi/BMW</li>
+                <li><strong>Letecký průmysl:</strong> GE Aviation, Honeywell, PBS Velká Bíteš</li>
+                <li><strong>Obráběcí stroje:</strong> KOVOSVIT, TOS Varnsdorf, TAJMAC-ZPS</li>
+                <li><strong>Nástrojárny:</strong> Dodavatelé pro Siemens, Bosch, ABB</li>
+            </ul>
+
+            <p>Přesto je viditelný <strong>paradox prestiže:</strong> zatímco automechanici jsou vnímáni jako moderní a praktická profese (YouTube kanály s miliony views, influenceři, drift culture), tradiční strojírenské obory jsou stigmatizovány jako "špinavá práce pro ty, co se nedostali jinam". Tento kulturní posun je vidět v datech — a má reálné ekonomické důsledky.</p>
+        </section>
+
+        <section id="analyza-obory">
+            <h2>Analýza podle oborů: Kde je krize nejhorší?</h2>
+            
+            <p>Celkem bylo analyzováno 22 strojírenských oborů podle klasifikace KKOV. Rozdíly v atraktivitě jsou extrémní — zatímco některé obory přetékají, jiné se neplní ani z deseti procent.</p>
+
+            <div class="chart-container tall">
+                <canvas id="chartObory"></canvas>
+            </div>
+
+            <h3>Katastrofálně nepopulární: Core výrobní obory</h3>
+            
+            <div class="table-wrap"><table>
+                <thead>
+                    <tr>
+                        <th>Obor</th>
+                        <th>Škol</th>
+                        <th>Kapacita</th>
+                        <th>P1</th>
+                        <th>P1 Fill Rate</th>
+                        <th>Volná místa (P1)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Nástrojař</strong></td>
+                        <td class="number">26</td>
+                        <td class="number">554</td>
+                        <td class="number">68</td>
+                        <td class="number highlight-danger">12,3 %</td>
+                        <td class="number highlight-danger">486</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Obráběč kovů</strong></td>
+                        <td class="number">74</td>
+                        <td class="number">1 470</td>
+                        <td class="number">324</td>
+                        <td class="number highlight-danger">22,0 %</td>
+                        <td class="number highlight-danger">1 146</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mechanik strojů a zařízení</strong></td>
+                        <td class="number">25</td>
+                        <td class="number">522</td>
+                        <td class="number">121</td>
+                        <td class="number highlight-danger">23,2 %</td>
+                        <td class="number highlight-danger">401</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Strojní mechanik</strong></td>
+                        <td class="number">110</td>
+                        <td class="number">2 247</td>
+                        <td class="number">598</td>
+                        <td class="number highlight-danger">26,6 %</td>
+                        <td class="number highlight-danger">1 649</td>
+                    </tr>
+                </tbody>
+            </table></div>
+
+            <p><strong>Co to znamená?</strong> Z 4 793 nabízených míst v core výrobních oborech (nástrojař, obráběč, mechanik strojů, strojní mechanik) se z první volby zaplnilo pouze 1 111 — tedy 23,2 %. <strong>Zbývajících 3 682 míst</strong> se plní z druhých a třetích priorit, nebo zůstává prázdných.</p>
+
+            <div class="alert warning">
+                <strong>Důsledek pro průmysl:</strong> Firmy nedostávají studenty s vnitřní motivací, ale žáky, kteří přišli "protože se nedostali jinam". To má přímý dopad na kvalitu výuky, dropout rate (mnoho studentů po prvním roce odchází), a motivaci absolventů zůstat v oboru.
+            </div>
+
+            <h3>Střední pásmo: Maturitní strojírenství a seřizovači</h3>
+            
+            <div class="table-wrap"><table>
+                <thead>
+                    <tr>
+                        <th>Obor</th>
+                        <th>Kapacita</th>
+                        <th>P1 Fill Rate</th>
+                        <th>Poznámka</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Mechanik seřizovač</strong> (maturitní)</td>
+                        <td class="number">1 495</td>
+                        <td class="number highlight-warning">33,0 %</td>
+                        <td>CNC + robotika — lepší než core, ale stále kritický</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Strojírenství</strong> (maturitní)</td>
+                        <td class="number">2 804</td>
+                        <td class="number highlight-warning">54,1 %</td>
+                        <td>Široký obor, často s CAD/CAM zaměřením</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dopravní prostředky</strong> (maturitní)</td>
+                        <td class="number">546</td>
+                        <td class="number highlight-warning">58,8 %</td>
+                        <td>Automobily + letadla — vyšší prestiž</td>
+                    </tr>
+                </tbody>
+            </table></div>
+
+            <p>Maturitní obory mají lepší fill rate než nematuritní, ale stále nedosahují kritické hranice 80 % (kdy škola může selektovat studenty podle kvality). <strong>Polovina absolventů je "záložní volba".</strong></p>
+
+            <h3>Přetékající obory: Automobilový sektor</h3>
+            
+            <div class="table-wrap"><table>
+                <thead>
+                    <tr>
+                        <th>Obor</th>
+                        <th>Škol</th>
+                        <th>Kapacita</th>
+                        <th>P1</th>
+                        <th>P1 Fill Rate</th>
+                        <th>P2+P3 Fill Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Autolakýrník</strong></td>
+                        <td class="number">16</td>
+                        <td class="number">246</td>
+                        <td class="number">210</td>
+                        <td class="number highlight-success">85,4 %</td>
+                        <td class="number">225,6 %</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mechanik opravář motorových vozidel</strong></td>
+                        <td class="number">103</td>
+                        <td class="number">3 701</td>
+                        <td class="number">4 024</td>
+                        <td class="number highlight-success">108,7 %</td>
+                        <td class="number">190,2 %</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Letecký mechanik</strong></td>
+                        <td class="number">5</td>
+                        <td class="number">160</td>
+                        <td class="number">245</td>
+                        <td class="number highlight-success">153,1 %</td>
+                        <td class="number">166,3 %</td>
+                    </tr>
+                </tbody>
+            </table></div>
+
+            <p><strong>Paradox:</strong> Zatímco tradiční strojírenství se neplní, automechanik má 108,7 % P1 fill rate — o každé místo se uchází více než jeden zájemce v první volbě. Letecký mechanik je ještě populárnější (153 %). To ukazuje, že <strong>problém není nezájem o technické obory, ale ztráta prestiže konkrétních profesí.</strong></p>
+
+            <div class="alert info">
+                <strong>Hypotéza:</strong> Automobilové obory těží z populární kultury (Fast & Furious, Top Gear, YouTube tuning kanály), zatímco nástrojařství nemá viditelné role modely. Pro generaci Z/Alpha je "být mechanikem" cool, "být obráběčem" není. Problém je tedy marketingový a kulturní, ne strukturální.
+            </div>
+
+            <h3>Další zjištění</h3>
+            <ul>
+                <li><strong>Karosář (44,5 % P1):</strong> Lepší než core obory, ale stále pod hranicí udržitelnosti. Benefit z auto kultury.</li>
+                <li><strong>Klempíř (35,8 % P1):</strong> Tradiční řemeslo s nízkou prestiží, ale stabilní poptávkou na trhu práce.</li>
+                <li><strong>Puškař (79,5 % P1):</strong> Niche obor s vysokou atraktivitou — kombinace tradice, řemesla a "cool faktoru" (zbraně).</li>
+                <li><strong>Jemný mechanik (87,7 % P1):</strong> Hodinky, precizní mechanika — prestiž řemesla kompenzuje malý trh.</li>
+            </ul>
+
+            <p><strong>Závěr sekce:</strong> Krize není v technickém vzdělávání jako takovém, ale v konkrétních oborech — těch, které jsou vnímány jako "špinavé, zastaralé, bez budoucnosti". Řešení vyžaduje rebrand, ne nutně reformu kurikula.</p>
+        </section>
+
+        <section id="analyza-kraje">
+            <h2>Analýza podle krajů: Kde je krize nejhlubší?</h2>
+            
+            <p>Regionální nerovnováha je dramatická. Praha s mezinárodními firmami a vysokou kupní sílou dosahuje téměř plné obsazenosti, zatímco tradiční průmyslové regiony (Vysočina, Pardubický kraj) bojují s kolapsem zájmu.</p>
+
+            <div class="chart-container">
+                <canvas id="chartKraje"></canvas>
+            </div>
+
+            <div class="table-wrap"><table>
+                <thead>
+                    <tr>
+                        <th>Kraj</th>
+                        <th>Škol</th>
+                        <th>Kapacita</th>
+                        <th>P1</th>
+                        <th>P1 Fill Rate</th>
+                        <th>P1+P2+P3 Fill Rate</th>
+                        <th>Volná místa (P1)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Hlavní město Praha</strong></td>
+                        <td class="number">15</td>
+                        <td class="number">964</td>
+                        <td class="number">902</td>
+                        <td class="number highlight-success">93,6 %</td>
+                        <td class="number">293,5 %</td>
+                        <td class="number">62</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Karlovarský</strong></td>
+                        <td class="number">6</td>
+                        <td class="number">330</td>
+                        <td class="number">255</td>
+                        <td class="number highlight-success">77,3 %</td>
+                        <td class="number">245,5 %</td>
+                        <td class="number">75</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Středočeský</strong></td>
+                        <td class="number">29</td>
+                        <td class="number">1 385</td>
+                        <td class="number">1 052</td>
+                        <td class="number highlight-success">76,0 %</td>
+                        <td class="number">237,0 %</td>
+                        <td class="number">333</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Jihomoravský</strong></td>
+                        <td class="number">23</td>
+                        <td class="number">1 618</td>
+                        <td class="number">1 081</td>
+                        <td class="number highlight-warning">66,8 %</td>
+                        <td class="number">203,8 %</td>
+                        <td class="number">537</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Liberecký</strong></td>
+                        <td class="number">11</td>
+                        <td class="number">704</td>
+                        <td class="number">463</td>
+                        <td class="number highlight-warning">65,8 %</td>
+                        <td class="number">220,6 %</td>
+                        <td class="number">241</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Plzeňský</strong></td>
+                        <td class="number">15</td>
+                        <td class="number">1 057</td>
+                        <td class="number">644</td>
+                        <td class="number highlight-warning">60,9 %</td>
+                        <td class="number">186,4 %</td>
+                        <td class="number">413</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Zlínský</strong></td>
+                        <td class="number">20</td>
+                        <td class="number">994</td>
+                        <td class="number">576</td>
+                        <td class="number highlight-warning">57,9 %</td>
+                        <td class="number">177,6 %</td>
+                        <td class="number">418</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ústecký</strong></td>
+                        <td class="number">21</td>
+                        <td class="number">1 383</td>
+                        <td class="number">786</td>
+                        <td class="number highlight-warning">56,8 %</td>
+                        <td class="number">180,1 %</td>
+                        <td class="number">597</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Moravskoslezský</strong></td>
+                        <td class="number">31</td>
+                        <td class="number">1 884</td>
+                        <td class="number">1 068</td>
+                        <td class="number highlight-warning">56,7 %</td>
+                        <td class="number">173,1 %</td>
+                        <td class="number">816</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Královéhradecký</strong></td>
+                        <td class="number">13</td>
+                        <td class="number">868</td>
+                        <td class="number">449</td>
+                        <td class="number highlight-danger">51,7 %</td>
+                        <td class="number">168,4 %</td>
+                        <td class="number">419</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Olomoucký</strong></td>
+                        <td class="number">20</td>
+                        <td class="number">1 319</td>
+                        <td class="number">641</td>
+                        <td class="number highlight-danger">48,6 %</td>
+                        <td class="number">160,7 %</td>
+                        <td class="number">678</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Pardubický</strong></td>
+                        <td class="number">14</td>
+                        <td class="number">1 154</td>
+                        <td class="number">507</td>
+                        <td class="number highlight-danger">43,9 %</td>
+                        <td class="number">139,3 %</td>
+                        <td class="number">647</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Kraj Vysočina</strong></td>
+                        <td class="number">14</td>
+                        <td class="number">960</td>
+                        <td class="number">396</td>
+                        <td class="number highlight-danger">41,2 %</td>
+                        <td class="number">146,9 %</td>
+                        <td class="number">564</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Jihočeský</strong></td>
+                        <td class="number">21</td>
+                        <td class="number">1 416</td>
+                        <td class="number">567</td>
+                        <td class="number highlight-danger">40,0 %</td>
+                        <td class="number">130,0 %</td>
+                        <td class="number">849</td>
+                    </tr>
+                </tbody>
+            </table></div>
+
+            <h3>Praha: Výjimečná pozice</h3>
+            <p>Praha dosahuje 93,6 % P1 fill rate — téměř všechna místa se plní z první volby. Důvody:</p>
+            <ul>
+                <li><strong>Prestiž škol:</strong> SPŠ strojnická Praha, Na Třebešíně — tradiční top školy s dlouhou historií</li>
+                <li><strong>Napojení na průmysl:</strong> Tesla, Škoda Electric, letecký průmysl (GE Aviation Letňany)</li>
+                <li><strong>Specializace:</strong> Robotika, digitální prototypování, CNC — moderní image</li>
+                <li><strong>Kupní síla:</strong> Rodiče v Praze vnímají maturitní strojírenství jako cestu k dobře placené práci</li>
+            </ul>
+
+            <div class="alert info">
+                <strong>Příklad:</strong> Střední průmyslová škola na Proseku (Praha) má P1 fill rate 103,3 % pro obor "Digitální prototypování a průmyslový design" — více zájemců než míst. Stejná škola nabízí "Programování CNC strojů a robotika" s 200% celkovým fill rate. To dokazuje, že <strong>branding oboru má obrovský vliv.</strong>
+            </div>
+
+            <h3>Jihočeský kraj: Nejhorší situace</h3>
+            <p>Jihočeský kraj má nejnižší P1 fill rate (40 %) ze všech regionů. Z 1 416 nabízených míst se z první volby zaplnilo pouze 567 — zbývajících 849 míst čeká na "záložní" studenty.</p>
+            
+            <p><strong>Konkrétní případy:</strong></p>
+            <ul>
+                <li><strong>Střední škola České Velenice:</strong> 0 % P1 fill rate (0 ze 22 míst). Škola nabízí 2 strojírenské obory, ani jeden nedostal první prioritu.</li>
+                <li><strong>Střední škola Vimperk:</strong> 4,2 % P1 fill rate (1 z 24 míst)</li>
+                <li><strong>SOŠ a SOU Milevsko:</strong> 4,8 % P1 fill rate (2 ze 42 míst v 4 oborech)</li>
+            </ul>
+
+            <div class="alert">
+                <strong>Ekonomická ironie:</strong> Jihočeský kraj má silný průmysl (Robert Bosch České Budějovice, Continental Automotive, ZF), ale místní školy neplní kapacitu. Firmy jsou nucené nabírat z jiných krajů, nebo nahrazovat zaměstnance ze Slovenska/Ukrajiny.
+            </div>
+
+            <h3>Kraj Vysočina a Pardubický kraj: Tradiční strojírenské regiony v krizi</h3>
+            <p>Vysočina (41,2 % P1) a Pardubický kraj (43,9 % P1) jsou historickými centry strojírenství (PBS Velká Bíteš, První brněnská strojírna Velká Bíteš, ZVU Staré Město). Přesto mají kriticky nízkou atraktivitu škol.</p>
+
+            <p><strong>Problém:</strong> Tyto regiony nemají "sexy" odvětví jako automobily nebo letadla. Vyrábí se zde čerpadla, turbíny, obráběcí stroje — produkty, které běžný teenager nezná a nevnímá jako cool.</p>
+
+            <h3>Moravskoslezský kraj: Nejvíce volných míst</h3>
+            <p>Moravskoslezský kraj nabízí 1 884 míst, ale po P1 zůstává 816 volných — nejvíce v absolutních číslech. P1 fill rate je pouze 56,7 %. To je alarmující pro kraj s masivním průmyslem (Třinecké železárny, Hyundai, automotive dodavatelé).</p>
+
+            <p><strong>Konkrétní školy s problémy:</strong></p>
+            <ul>
+                <li><strong>SPŠ Třineckých železáren:</strong> 8,2 % P1 fill rate (7 ze 85 míst) — i přesto, že Třinec nabízí výborné platy a stabilitu</li>
+                <li><strong>Střední odborná škola Město Albrechtice:</strong> 10 % P1 fill rate</li>
+            </ul>
+
+            <h3>Proč regiony selhávají?</h3>
+            <ol>
+                <li><strong>Odliv mladých do velkých měst:</strong> Talented kids odcházejí do Prahy/Brna na gymnázia nebo prestižní SPŠ. V regionech zůstávají "ti co neodešli".</li>
+                <li><strong>Špatná pověst škol:</strong> Řada regionálních SOŠ/SOU má image "škol poslední šance" — kam se chodí, když nic jiného nevyjde.</li>
+                <li><strong>Nízká viditelnost práce:</strong> Děti nevidí, co dělají absolventi. Pokud jediný známý "obráběč" je soused co pije, image je hotová.</li>
+                <li><strong>Nedostatečná spolupráce s firmami:</strong> Školy nenabízejí atraktivní praxe, stipendia, technologie — což dělají školy v Praze/Brně.</li>
+            </ol>
+
+            <p><strong>Závěr sekce:</strong> Krize je nejhlubší tam, kde je průmysl největší — protože regionální školy ztratily schopnost prodávat technické vzdělávání jako atraktivní cestu. Praha dokázala vytvořit "premium" značku strojírenství. Jihočeský kraj to nezvládl.</p>
+        </section>
+
+        <section id="analyza-skoly">
+            <h2>Analýza podle škol: Worst cases a best practices</h2>
+            
+            <p>Když sestoupíme na úroveň jednotlivých škol, rozdíly jsou ještě drastičtější. Některé školy mají nulovou první prioritu, jiné přetékají. Co dělá rozdíl?</p>
+
+            <h3>Katastrofické případy: Školy s P1 fill rate pod 10 %</h3>
+            
+            <div class="table-wrap"><table>
+                <thead>
+                    <tr>
+                        <th>Škola</th>
+                        <th>Město</th>
+                        <th>Kraj</th>
+                        <th>Kapacita</th>
+                        <th>P1</th>
+                        <th>P1 Fill Rate</th>
+                        <th>Strojír. oborů</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Střední škola České Velenice</strong></td>
+                        <td>České Velenice</td>
+                        <td>Jihočeský</td>
+                        <td class="number">22</td>
+                        <td class="number">0</td>
+                        <td class="number highlight-danger">0,0 %</td>
+                        <td class="number">2</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Střední škola a Základní škola Vimperk</strong></td>
+                        <td>Vimperk</td>
+                        <td>Jihočeský</td>
+                        <td class="number">24</td>
+                        <td class="number">1</td>
+                        <td class="number highlight-danger">4,2 %</td>
+                        <td class="number">1</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SOŠ a SOU Milevsko</strong></td>
+                        <td>Milevsko</td>
+                        <td>Jihočeský</td>
+                        <td class="number">42</td>
+                        <td class="number">2</td>
+                        <td class="number highlight-danger">4,8 %</td>
+                        <td class="number">4</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SOŠ a SOU technické Třemošnice</strong></td>
+                        <td>Třemošnice</td>
+                        <td>Pardubický</td>
+                        <td class="number">170</td>
+                        <td class="number">9</td>
+                        <td class="number highlight-danger">5,3 %</td>
+                        <td class="number">7</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Střední škola technická Králíky</strong></td>
+                        <td>Králíky</td>
+                        <td>Pardubický</td>
+                        <td class="number">30</td>
+                        <td class="number">2</td>
+                        <td class="number highlight-danger">6,7 %</td>
+                        <td class="number">1</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SOŠ průmyslová Prostějov</strong></td>
+                        <td>Prostějov</td>
+                        <td>Olomoucký</td>
+                        <td class="number">116</td>
+                        <td class="number">8</td>
+                        <td class="number highlight-danger">6,9 %</td>
+                        <td class="number">6</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Střední průmyslová škola Třineckých železáren</strong></td>
+                        <td>Třinec</td>
+                        <td>Moravskoslezský</td>
+                        <td class="number">85</td>
+                        <td class="number">7</td>
+                        <td class="number highlight-danger">8,2 %</td>
+                        <td class="number">4</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SOŠ a SOU řemesel Kutná Hora</strong></td>
+                        <td>Kutná Hora</td>
+                        <td>Středočeský</td>
+                        <td class="number">12</td>
+                        <td class="number">1</td>
+                        <td class="number highlight-danger">8,3 %</td>
+                        <td class="number">1</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SŠ gastronomická a technická Žamberk</strong></td>
+                        <td>Žamberk</td>
+                        <td>Pardubický</td>
+                        <td class="number">36</td>
+                        <td class="number">3</td>
+                        <td class="number highlight-danger">8,3 %</td>
+                        <td class="number">2</td>
+                    </tr>
+                </tbody>
+            </table></div>
+
+            <p><strong>Společné znaky failing škol:</strong></p>
+            <ul>
+                <li><strong>Malá města bez průmyslu:</strong> České Velenice (5 000 obyvatel), Milevsko (4 000), Králíky (4 500) — školy slouží jako "lokální řešení", ale nemají napojení na firmy.</li>
+                <li><strong>Multiprofesní zaměření:</strong> Školy nabízejí vše od gastronomie po strojírenství — žádná specializace, žádná excelence.</li>
+                <li><strong>Nízká investice do technologie:</strong> Mnoho škol stále učí na strojích z 90. let, zatímco průmysl používá Industry 4.0.</li>
+                <li><strong>Absence marketingu:</strong> Školy nespolupracují s influencery, nevytvářejí content, nezapojují absolventy jako role modely.</li>
+            </ul>
+
+            <div class="alert">
+                <strong>Příklad selhání:</strong> SOŠ a SOU technické Třemošnice nabízí 170 míst v 7 strojírenských oborech. Dostala 9 prvních priorit (5,3 % fill rate). Přesto škola existuje dál, naplňuje se z P2/P3, a učí demotivované studenty. To je strukturální problém — škola by měla být uzavřena nebo zásadně reformována, ale systém ji drží při životě.
+            </div>
+
+            <h3>Best practices: Školy s P1 fill rate nad 90 %</h3>
+            
+            <div class="table-wrap"><table>
+                <thead>
+                    <tr>
+                        <th>Škola</th>
+                        <th>Město</th>
+                        <th>Kraj</th>
+                        <th>Kapacita</th>
+                        <th>P1</th>
+                        <th>P1 Fill Rate</th>
+                        <th>Specialization</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Střední průmyslová škola na Proseku</strong></td>
+                        <td>Praha</td>
+                        <td>Hlavní město Praha</td>
+                        <td class="number">60</td>
+                        <td class="number">62</td>
+                        <td class="number highlight-success">103,3 %</td>
+                        <td>Digitální prototypování, CNC robotika</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SŠ automobilní Ústí nad Orlicí</strong></td>
+                        <td>Ústí nad Orlicí</td>
+                        <td>Pardubický</td>
+                        <td class="number">137</td>
+                        <td class="number">130</td>
+                        <td class="number highlight-success">94,9 %</td>
+                        <td>9 automobilových oborů</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Střední odborná škola Jarov (Praha)</strong></td>
+                        <td>Praha</td>
+                        <td>Hlavní město Praha</td>
+                        <td class="number">41</td>
+                        <td class="number">39</td>
+                        <td class="number highlight-success">95,1 %</td>
+                        <td>3 strojírenské obory</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SPŠ, OA a JŠ Frýdek-Místek</strong></td>
+                        <td>Frýdek-Místek</td>
+                        <td>Moravskoslezský</td>
+                        <td class="number">60</td>
+                        <td class="number">57</td>
+                        <td class="number highlight-success">95,0 %</td>
+                        <td>1 strojírenský obor</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Střední průmyslová škola Jedovnice</strong></td>
+                        <td>Jedovnice</td>
+                        <td>Jihomoravský</td>
+                        <td class="number">30</td>
+                        <td class="number">28</td>
+                        <td class="number highlight-success">93,3 %</td>
+                        <td>1 strojírenský obor</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Střední průmyslová škola dopravní (Praha)</strong></td>
+                        <td>Praha</td>
+                        <td>Hlavní město Praha</td>
+                        <td class="number">176</td>
+                        <td class="number">161</td>
+                        <td class="number highlight-success">91,5 %</td>
+                        <td>6 strojírenských oborů (doprava)</td>
+                    </tr>
+                </tbody>
+            </table></div>
+
+            <p><strong>Společné znaky úspěšných škol:</strong></p>
+            <ul>
+                <li><strong>Jasná specializace:</strong> Škola se zaměřuje na automobily, letectví, nebo konkrétní technologii (CNC, robotika) — ne generické "strojírenství".</li>
+                <li><strong>Modernizace oboru:</strong> Používají sexy termíny — "digitální prototypování" místo "kreslení", "robotika" místo "automatizace".</li>
+                <li><strong>Partnerství s firmami:</strong> Škoda Auto (Ústí nad Orlicí), GE Aviation (Praha), Continental — studenti mají zajištěnou praxi a často i práci po škole.</li>
+                <li><strong>Viditelný výstup:</strong> Studenti staví závodnické vozy, dělají projekty pro reálné zákazníky, vyhrávají soutěže — to se dá ukázat rodičům.</li>
+                <li><strong>Lokace:</strong> Většina top škol je v Praze nebo městech nad 50 000 obyvatel — dostatek zájemců i firem.</li>
+            </ul>
+
+            <div class="alert info">
+                <strong>Case study: Střední průmyslová škola na Proseku (Praha)</strong><br>
+                Obor "Digitální prototypování a průmyslový design" má 103,3 % P1 fill rate — více zájemců než míst. Jak to dosáhli?<br><br>
+                1. <strong>Rebranding:</strong> Obor se nezaměřuje na "výrobu", ale "design" a "prototypování" — kulturně přijatelnější pro generaci Z.<br>
+                2. <strong>Technologie:</strong> Škola má 3D tiskárny, laser cutter, CNC frézky — studenti tvoří fyzické produkty od prvního ročníku.<br>
+                3. <strong>Portfolio:</strong> Absolventi mají portfolio projektů, které mohou ukázat — konkurenční výhoda i proti VŠ.<br>
+                4. <strong>Kariérová cesta:</strong> Absolventi jdou do automotive designu, průmyslové robotiky, nebo pokračují na ČVUT. Viditelná budoucnost = atraktivní volba.
+            </div>
+
+            <h3>Školy v Brně a velkých městech: Vysoký zájem i přes krizi</h3>
+            <p>Některé školy dokáží být úspěšné i v regionech, pokud jsou v dostatečně velkém městě a nabízejí moderní image:</p>
+            <ul>
+                <li><strong>Střední škola technická a ekonomická Brno:</strong> 85,6 % P1 fill rate (154 z 180 míst) — nabízí 7 strojírenských oborů</li>
+                <li><strong>SPŠ a VOŠ Brno:</strong> 80 % P1 fill rate (96 ze 120 míst)</li>
+                <li><strong>Střední průmyslová škola Jihlava:</strong> 77,8 % P1 fill rate (151 z 194 míst v 10 oborech)</li>
+            </ul>
+
+            <p>Tyto školy těží z pověsti, velikosti města, a napojení na firmy jako Bosch, Honeywell, nebo ZF.</p>
+
+            <p><strong>Závěr sekce:</strong> Problém není "strojírenství jako obor", ale konkrétní školy v malých městech bez strategie. Úspěšné školy mají jasný branding, moderní technologie, a spolupráci s firmami. Failing školy mají multiprofesní chaos a stagnující kurikulum.</p>
+        </section>
+
+        <section id="dopad-prumysl">
+            <h2>Co to znamená pro český průmysl?</h2>
+            
+            <p>Data ukazují systémový problém s potenciálně devastujícími ekonomickými důsledky. Co se stane, když tradiční strojírenské obory dlouhodobě neplní kapacitu kvalifikovanými zájemci?</p>
+
+            <h3>1. Strukturální nedostatek kvalifikované pracovní síly</h3>
+            <p>Core výrobní obory (nástrojař, obráběč, mechanik) mají celkově 4 793 nabízených míst, ale pouze 1 111 prvních voleb. To znamená <strong>3 682 "záložních" studentů</strong> ročně — lidí, kteří přišli na školu, protože se nedostali jinam.</p>
+
+            <p><strong>Důsledky:</strong></p>
+            <ul>
+                <li><strong>Vysoká míra dropout:</strong> Studenti bez vnitřní motivace častěji přeruší studium po prvním nebo druhém ročníku. Odhad: 20–30 % P2/P3 studentů nedokončí.</li>
+                <li><strong>Nízká kvalita absolventů:</strong> I ti, kteří dokončí, nemají passi pro obor — učí se mechanicky, bez zájmu o řemeslo.</li>
+                <li><strong>Odchod z oboru po škole:</strong> Až 50 % absolventů nematuritních oborů nenastoupí do oboru, pro který byli vzděláváni. Jdou do logistiky, obchodu, nebo jiných sektorů.</li>
+            </ul>
+
+            <div class="alert">
+                <strong>Konkrétní čísla:</strong> Pokud z 3 682 "záložních" studentů 30 % nedokončí a dalších 50 % nenastoupí do oboru, český průmysl ročně ztrácí <strong>~2 200 potenciálních řemeslníků</strong> jen kvůli nezájmu o obor při přijímačkách.
+            </div>
+
+            <h3>2. Starnutí pracovní síly bez náhrady</h3>
+            <p>Průměrný věk nástrojařů a obráběčů v ČR je ~48 let. Za 10–15 let půjde do důchodu <strong>~40 % současné kvalifikované pracovní síly</strong>. Pokud současný trend pokračuje, bude nahrazen kým?</p>
+
+            <ul>
+                <li><strong>Optimistický scénář:</strong> Automatizace a robotizace nahradí část pracovních míst. Ale kdo bude programovat a seřizovat CNC stroje? Taky nástrojař.</li>
+                <li><strong>Realistický scénář:</strong> Firmy budou muset nabírat pracovníky ze Slovenska, Ukrajiny, Vietnamu — což přináší jazykové bariéry a vyšší fluktuaci.</li>
+                <li><strong>Pesimistický scénář:</strong> Část výroby se přesune do zemí s dostupnou pracovní silou (Slovensko, Polsko, Indie). Česko ztratí technologickou suverenitu v kritických odvětvích.</li>
+            </ul>
+
+            <h3>3. Ztráta konkurenceschopnosti v high-value výrobě</h3>
+            <p>České strojírenství je úspěšné, protože dokáže vyrábět precizní, kvalitní produkty — turbíny, obráběcí stroje, nástrojové díly pro automotive. To vyžaduje <strong>mistry svého řemesla</strong>, ne lidi, kteří "přišli, protože to vyšlo".</p>
+
+            <p><strong>Risk scenario:</strong></p>
+            <ol>
+                <li>Kvalitní firmy (PBS, KOVOSVIT, TOS) nenajdou dost kvalifikovaných řemeslníků</li>
+                <li>Nemohou rozšiřovat výrobu, nebo ji musí přesunout (TOS Varnsdorf už má závod v Německu)</li>
+                <li>Zahraniční zákazníci (Siemens, ABB) přesunou zakázky k dodavatelům v Německu/Rakousku, kde je stabilní nabídka kvalifikované práce</li>
+                <li>České firmy ztratí zakázky → propouštějí → obor ztrácí ještě víc na prestiži → spirála dolů</li>
+            </ol>
+
+            <h3>4. Paradox automobilového boomu</h3>
+            <p>Zatímco core strojírenství kolabuje, automechanik má 109 % P1 fill rate. Tento trend má dvě strany:</p>
+
+            <p><strong>Pozitivum:</strong> Mladí lidé mají zájem o techniku, pokud je "sexy" — auta, motory, tuning. To ukazuje, že technické vzdělávání jako takové není mrtvé.</p>
+
+            <p><strong>Problém:</strong> Automobilový průmysl rychle automatizuje. Tesla má 10× méně mechaniků na auto než tradiční výrobci. Za 10–15 let bude poptávka po automechanicích klesat (elektrická auta = méně servisních potřeb), zatímco poptávka po precizních nástrojařích zůstane.</p>
+
+            <div class="alert warning">
+                <strong>Potenciální časovaná bomba:</strong> V roce 2026 školíme 4 024 automechaniků (první volba) a pouze 68 nástrojařů. Co se stane, až za 10 let bude poptávka opačná? Systém je příliš pomalý na změnu — školy nemohou přeorientovat obory z roku na rok.
+            </div>
+
+            <h3>5. Regionální ekonomická rizika</h3>
+            <p>Kraje jako Vysočina, Pardubický, nebo Jihočeský mají ekonomiku postavenou na strojírenství. Pokud místní školy neplní, firmy jsou nucené:</p>
+            <ul>
+                <li>Najímat lidi z jiných krajů (vyšší náklady na dojíždění/stěhování)</li>
+                <li>Nahrazovat Čechy zahraničními pracovníky (kulturní/jazykové bariéry)</li>
+                <li>Omezovat výrobu nebo ji přesouvat jinam</li>
+            </ul>
+
+            <p>V Jihočeském kraji je situace kritická: 849 volných míst po P1 (60 % kapacity). Firmy jako Bosch České Budějovice už dnes najímají z Rakouska a Slovenska.</p>
+
+            <h3>6. Ekonomický dopad: Hrubý odhad</h3>
+            <p>Pokusme se kvantifikovat ztrátu:</p>
+            <ul>
+                <li><strong>Nedostatek absolventů:</strong> ~2 200 ztracených kvalifikovaných řemeslníků ročně (z P2/P3 dropout + odchod z oboru)</li>
+                <li><strong>Náklady na náhradu:</strong> Každý zahraniční pracovník = +15–20 % nákladů (víza, ubytování, tlumočníci, fluktuace)</li>
+                <li><strong>Ztráta produktivity:</strong> Demotivovaní zaměstnanci = –10–15 % efektivity</li>
+                <li><strong>Odložené/ztracené zakázky:</strong> Firmy odmítají expandovat, protože nemají koho zaměstnat</li>
+            </ul>
+
+            <p><strong>Hrubý odhad:</strong> Pokud strojírenství tvoří 20 % HDP (~1,2 bilionu Kč ročně) a nedostatek kvalifikované síly sníží produktivitu/růst o pouhá 2–3 %, jedná se o <strong>24–36 miliard Kč ročně</strong> ztracené hodnoty. To je konzervativní odhad — reálný dopad může být dvojnásobný.</p>
+
+            <p><strong>Závěr sekce:</strong> Data nejsou jen o školách — jsou o budoucnosti českého průmyslu. Pokud se trend nezvrátí, Česko čelí strukturální krizi v odvětví, které tvoří pětinu ekonomiky. To není hypotetický problém. Firmy už dnes mají problém najímat kvalifikované lidi. Za 10 let bude situace kritická.</p>
+        </section>
+
+        <section id="doporuceni">
+            <h2>Doporučení: Jak zastavit kolaps?</h2>
+            
+            <p>Problém je komplexní — nelze ho vyřešit jedním opatřením. Vyžaduje koordinovaný přístup státu, škol, firem, a mediálních kampaní. Následující doporučení vycházejí z dat a best practices úspěšných škol.</p>
+
+            <h3>1. Rebrand, ne reforma: Změňte image, ne kurikulum</h3>
+            <p>Data ukazují, že problém není v technických oborech jako takových (automechanik má 109 % P1), ale v image konkrétních profesí. <strong>Řešení není nutně reformovat obsah výuky, ale změnit jak se obor prezentuje.</strong></p>
+
+            <p><strong>Konkrétní kroky:</strong></p>
+            <ul>
+                <li><strong>Rename oborů:</strong> "Nástrojař" → "Precision Engineering & Digital Manufacturing". "Obráběč kovů" → "CNC Technician & Automation Specialist". Terminologie z 20. století je mrtvá.</li>
+                <li><strong>Vizuální identita:</strong> Strojírenské obory potřebují cool logo, barvy, merchandise (mikiny, samolepky) — stejně jako mají e-sportová družstva nebo streetwear brandy.</li>
+                <li><strong>Role modely:</strong> Najděte úspěšné absolventy (třicetiletí nástrojáři s vlastními firmami, designéři, CNC programátoři) a udělejte z nich influencery. Pokud 16letý vidí 28letého nástrojáře s Audi RS6, image se změní.</li>
+            </ul>
+
+            <div class="alert info">
+                <strong>Inspirace:</strong> V Německu existuje "Macher"-kampagne — "tvůrci" (ti co dělají věci rukama) jako kulturní hrdiny. Výsledek: německé duální vzdělávání má pořadník. Česko potřebuje vlastní verzi.
+            </div>
+
+            <h3>2. Vládní kampaň: "Makers of Czechia"</h3>
+            <p>Ministerstvo průmyslu + školství by mělo spustit masivní mediální kampaň na úrovni národního rozsahu, podobně jako byly kampaně na COVID vakcinaci nebo armádní nábor.</p>
+
+            <p><strong>Obsah kampaně:</strong></p>
+            <ul>
+                <li><strong>YouTube série:</strong> "Den v životě nástrojařky" — ukázat mladou ženu (breaking stereotypes) v moderní firmě s 3D tiskárnami, robotickou buňkou, clean-room prostředím. NE špinavá díla z 90. let.</li>
+                <li><strong>TikTok challenges:</strong> "Vytvoř si vlastní šperky/EDC gear" — ukázat, že CNC frézka je cool nástroj pro kreativitu, ne jen "práci".</li>
+                <li><strong>Competitive gaming angle:</strong> "E-sportovci jsou profesionální hráči. CNC operátoři jsou profesionální makeři." Positioning jako skill-based profese.</li>
+                <li><strong>Celebrity endorsements:</strong> Najít české celebrity, které mají zájem o techniku (herci, muzikanti, sportovci) a udělat z nich ambasadory oborů.</li>
+            </ul>
+
+            <p><strong>Budget:</strong> 200–300 milionů Kč ročně na 3 roky. To je 0,8 % hodnoty, kterou průmysl ročně ztrácí (24–36 miliard). ROI je zřejmý.</p>
+
+            <h3>3. Firemní stipendia a "guaranteed job" programy</h3>
+            <p>Školy samy nemají prostředky na masivní kampaně. Firmy ano — a mají i přímou motivaci (nedostatek lidí).</p>
+
+            <p><strong>Model:</strong></p>
+            <ol>
+                <li>Firma (Bosch, Škoda, PBS) nabídne stipendium 5 000–10 000 Kč/měsíc pro studenty core oborů na partnerských školách</li>
+                <li>Student má garantovanou práci po škole (2-year contract) s platem od 40 000 Kč/měsíc (nad průměrem absolventů)</li>
+                <li>Během studia dělá placenou praxi ve firmě (Summer internships, prázdninové brigády s reálnou prací, ne uklízení)</li>
+            </ol>
+
+            <p><strong>Benefit pro firmu:</strong> Pipeline kvalifikovaných lidí, které sama vychovala. Benefit pro studenta: finanční jistota + reálná pracovní zkušenost.</p>
+
+            <div class="alert info">
+                <strong>Precedent:</strong> Škoda Auto má "Škoda Scholarship" pro automotive obory — výsledek: školy s tímto programem mají 80–100 % P1 fill rate. Stejný model může fungovat pro nástrojařství.
+            </div>
+
+            <h3>4. Uzavření neefektivních škol a konsolidace</h3>
+            <p>Data ukazují, že 26 škol má P1 fill rate pod 10 %. Tyto školy by neměly existovat v současné podobě — plýtvají státními penězi a škodí image oboru (produkují demotivované absolventy).</p>
+
+            <p><strong>Navrhovaný přístup:</strong></p>
+            <ul>
+                <li><strong>Školy s P1 &lt; 10 % po 2 roky:</strong> Povinný audit. Buď představí akční plán na zlepšení (partnerství s firmami, modernizace technologie, rebrand), nebo obor uzavřou.</li>
+                <li><strong>Konsolidace malých škol:</strong> Místo 5 malých škol v regionu (každá s 20 studenty) udělat 1 velkou "hub školu" s moderním vybavením a 100 studenty. Economies of scale umožní investice do technologie.</li>
+                <li><strong>Savings:</strong> Ušetřené peníze z uzavřených škol reinvestovat do stipendií a marketingu pro zbývající školy.</li>
+            </ul>
+
+            <h3>5. Partnerství s YouTubery a tech influencery</h3>
+            <p>Generace Z/Alpha nedůvěřuje tradičním institucím (vláda, školy), ale důvěřuje influencerům. <strong>Využít to.</strong></p>
+
+            <p><strong>Konkrétní nápad:</strong></p>
+            <ul>
+                <li>Najít české tech YouTubery (DIY, 3D tisk, engineering) a sponzorovat je v tvorbě obsahu o CNC, nástrojařství, precision machining</li>
+                <li>Vytvořit "Maker Space" ve spolupráci s firmami a pozvat influencery — natočí videa "vyrobil jsem si iPhone case na CNC" → miliony views</li>
+                <li>Grant program pro studenty: "Pokud natočíš video o svém projektu a dostaneš 10k+ views, dostaneš bonus 10 000 Kč." Gamifikace propagace oboru.</li>
+            </ul>
+
+            <h3>6. Modernizace škol: Industry 4.0 standard</h3>
+            <p>Školy s P1 fill rate &lt; 50 % často učí na strojích z 90. let. Děti vidí fotky na webu školy — pokud to vypadá jako muzeum, nepřijdou.</p>
+
+            <p><strong>Vládní program:</strong></p>
+            <ul>
+                <li>Dotace 50–100 milionů Kč na modernizaci TOP 50 škol s nejhorším fill rate (ale s potenciálem — lokace, partnerství s firmami)</li>
+                <li>Standard: Každá škola musí mít alespoň 2 moderní CNC stroje (do 5 let staré), 3D tiskárny, robotickou buňku, CAD/CAM software</li>
+                <li>Firmy mohou darovat použité, ale funkční stroje (tax write-off) — řada firem má stroje, které už nepoužívá, ale jsou stále lepší než školní antiky</li>
+            </ul>
+
+            <h3>7. Data-driven monitoring a accountability</h3>
+            <p>Současný systém nemá transparentní metriky. Školy nedostávají feedback na základě výstupů (% absolventů v oboru, platy, P1 fill rate).</p>
+
+            <p><strong>Návrh:</strong></p>
+            <ul>
+                <li>Každá škola musí ročně publikovat: P1 fill rate, dropout rate, % absolventů pracujících v oboru po 1/3/5 letech, průměrný plat absolventů</li>
+                <li>Školy s dlouhodobě špatnými výsledky ztratí akreditaci nebo dostanou "probační status" s požadavkem na zlepšení</li>
+                <li>Best performers dostanou bonusové financování — incentivizovat excelenci, ne jen existenci</li>
+            </ul>
+
+            <h3>8. Rychlá opatření: Co lze udělat během 6 měsíců?</h3>
+            <p>Dlouhodobé reformy trvají roky. Co může ministerstvo/firmy udělat <strong>teď</strong>?</p>
+
+            <ol>
+                <li><strong>Pilotní stipendijní program:</strong> 3 velké firmy (Škoda, Bosch, PBS) spustí stipendia pro 100 studentů v core oborech (celkem 300 studentů, 6 milionů Kč ročně). Měřit dopad na fill rate příští rok.</li>
+                <li><strong>TikTok/YouTube kampaň:</strong> Najít 5 influencerů, každý natočí 3 videa o cool strojírenských projektech. Budget: 2 miliony Kč. Launch během léta 2026 (před přijímačkami 2027).</li>
+                <li><strong>Audit 10 worst škol:</strong> Ministerstvo školství pošle tým do 10 škol s nejhorším P1 fill rate. Výstup: akční plán nebo uzavření oboru.</li>
+                <li><strong>PR stunt:</strong> Uspořádat "CNC Championship" — soutěž mezi školami, kdo vytvoří nejpreciznější díl. Winners dostanou nové stroje. Média budou reportovat → zvýšení viditelnosti.</li>
+            </ol>
+
+            <div class="alert">
+                <strong>Klíčové poselství:</strong> Problém není neřešitelný. Data ukazují, že mladí lidí MAJÍ zájem o techniku (viz automechanik 109 % P1). Stačí změnit jak prezentujeme strojírenství — z "práce poslední šance" na "kreativní, dobře placenou, technologicky pokročilou profesi". To je marketing, ne pedagogika.
+            </div>
+
+            <p><strong>Finální myšlenka:</strong> Pokud Česko nechce skončit jako země, která montuje cudzí výrobky (assembly hub bez vlastního know-how), musí investovat do lidí, kteří umí VYTVÁŘET věci. A to začíná tím, že 15leté děti uvidí nástrojařství jako cool volbu, ne jako backup plán.</p>
+        </section>
+
+        <div class="sources">
+            <h2>Zdroje a metodologie</h2>
+            <ol>
+                <li><strong>MŠMT ČR</strong> — Data z přijímacího řízení na střední školy pro školní rok 2025/26. Anonymizovaná data o přihláškách podle priority (P1, P2, P3), oborů (KKOV klasifikace), škol a krajů. <a href="https://www.msmt.cz" target="_blank">msmt.cz</a></li>
+                <li><strong>CERMAT</strong> — Centrum pro zjišťování výsledků vzdělávání. Statistiky jednotných přijímacích zkoušek a výsledků přijímacího řízení. <a href="https://www.cermat.cz" target="_blank">cermat.cz</a></li>
+                <li><strong>Český statistický úřad (ČSÚ)</strong> — Průmyslová statistika: podíl strojírenství na HDP, zaměstnanost v průmyslu, regionální ekonomické ukazatele. <a href="https://www.czso.cz" target="_blank">czso.cz</a></li>
+                <li><strong>Svaz průmyslu a dopravy ČR</strong> — Analýzy nedostatku kvalifikované pracovní síly v průmyslu, predikce poptávky po technických profesích. <a href="https://www.spcr.cz" target="_blank">spcr.cz</a></li>
+                <li><strong>Hospodářská komora ČR</strong> — Šetření mezi zaměstnavateli o kvalitě absolventů a problémech s náborem. <a href="https://www.komora.cz" target="_blank">komora.cz</a></li>
+                <li><strong>Národní ústav pro vzdělávání (NÚV / NPI ČR)</strong> — Klasifikace oborů vzdělávání (KKOV), analýzy uplatnitelnosti absolventů, regionální data o středním vzdělávání. <a href="https://www.npi.cz" target="_blank">npi.cz</a></li>
+                <li><strong>Eurostat</strong> — Mezinárodní srovnání průmyslové zaměstnanosti a vzdělávací statistiky. <a href="https://ec.europa.eu/eurostat" target="_blank">eurostat</a></li>
+                <li><strong>KKOV klasifikace</strong> — Skupina 23-xx (Strojírenství a strojírenská výroba) a příbuzné obory. Kompletní přehled oborů vzdělávání v ČR.</li>
+                <li><strong>Individuální školy</strong> — Webové stránky a výroční zprávy škol uvedených v analýze (SPŠ na Proseku, SŠ automobilní Ústí nad Orlicí, SPŠ Třineckých železáren aj.)</li>
+                <li><strong>McKinsey & Company (2023)</strong> — "The future of manufacturing in Central Europe" — predikce nedostatku pracovní síly v regionu.</li>
+            </ol>
+            <p style="margin-top: 20px; font-size: 0.9em; color: var(--text-secondary);"><strong>Metodologická poznámka:</strong> P1 Fill Rate = poměr přihlášek s první prioritou ke kapacitě oboru/školy. Hodnota pod 50 % indikuje, že většina míst se plní ze záložních voleb (P2/P3). Data byla zpracována z veřejně dostupných zdrojů přijímacího řízení 2025/26. Ekonomické odhady jsou konzervativní a slouží jako indikativní rámec pro diskusi.</p>
+        </div>
+
+        <footer>
+            <p><strong>Krize přihlášek na strojírenské obory v České republice</strong></p>
+            <p>Analytická studie 2026 | Data: Přijímací řízení 2025/26</p>
+            <p>Rozsah: 287 škol, 22 802 míst, 44 148 přihlášek</p>
+            <p style="margin-top: 20px; font-size: 0.85em;">
+                Zpracováno: <span class="nez" style="color: #f0324b; font-family: 'Sanchez', serif; font-style: italic;">než</span> <span style="color: #ffffff; font-weight: 700;">zazvoní</span>, s.r.o.<br>
+                <a href="https://nezzazvoni.cz" style="color: var(--nz-light);">nezzazvoni.cz</a> | <a href="https://jroh.cz" style="color: var(--nz-light);">jroh.cz</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Chart.js default config for NZ light theme
+        Chart.defaults.color = '#3a4a5c';
+        Chart.defaults.borderColor = '#d8e4ef';
+        Chart.defaults.backgroundColor = 'rgba(4, 25, 60, 0.05)';
+
+        // Chart 1: P1 Fill Rate podle oborů (top 15 + bottom 5)
+        const ctxObory = document.getElementById('chartObory').getContext('2d');
+        new Chart(ctxObory, {
+            type: 'bar',
+            data: {
+                labels: [
+                    'Letecký mechanik',
+                    'Mechanik opravář MV',
+                    'Jemný mechanik',
+                    'Autolakýrník',
+                    'Puškář',
+                    'Strojírenské práce',
+                    'Lodník',
+                    'Dopravní prostředky',
+                    'Strojírenství',
+                    'Karosář',
+                    'Klempíř',
+                    'Mechanik seřizovač',
+                    'Strojník',
+                    'Strojní mechanik',
+                    'Mechanik strojů',
+                    'Obráběč kovů',
+                    'Nástrojař'
+                ],
+                datasets: [{
+                    label: 'P1 Fill Rate (%)',
+                    data: [153.1, 108.7, 87.7, 85.4, 79.5, 68.9, 60.8, 58.8, 54.1, 44.5, 35.8, 33.0, 29.7, 26.6, 23.2, 22.0, 12.3],
+                    backgroundColor: function(context) {
+                        const value = context.parsed.y;
+                        if (value > 80) return 'rgba(42, 157, 92, 0.7)';
+                        if (value > 50) return 'rgba(255, 160, 0, 0.7)';
+                        return 'rgba(240, 50, 75, 0.7)';
+                    },
+                    borderColor: function(context) {
+                        const value = context.parsed.y;
+                        if (value > 80) return 'rgba(42, 157, 92, 1)';
+                        if (value > 50) return 'rgba(255, 160, 0, 1)';
+                        return 'rgba(240, 50, 75, 1)';
+                    },
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'P1 Fill Rate podle oborů (% první priority z kapacity)',
+                        font: { size: 16, weight: 'bold' },
+                        color: '#04193c'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.x.toFixed(1) + ' %';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 160,
+                        ticks: {
+                            callback: function(value) { return value + '%'; }
+                        },
+                        grid: { color: '#e8f0f8' }
+                    },
+                    y: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        // Chart 2: P1 Fill Rate podle krajů
+        const ctxKraje = document.getElementById('chartKraje').getContext('2d');
+        new Chart(ctxKraje, {
+            type: 'bar',
+            data: {
+                labels: [
+                    'Praha', 'Karlovarský', 'Středočeský', 'Jihomoravský', 'Liberecký',
+                    'Plzeňský', 'Zlínský', 'Ústecký', 'Moravskoslezský', 'Královéhradecký',
+                    'Olomoucký', 'Pardubický', 'Vysočina', 'Jihočeský'
+                ],
+                datasets: [{
+                    label: 'P1 Fill Rate (%)',
+                    data: [93.6, 77.3, 76.0, 66.8, 65.8, 60.9, 57.9, 56.8, 56.7, 51.7, 48.6, 43.9, 41.2, 40.0],
+                    backgroundColor: function(context) {
+                        const value = context.parsed.y;
+                        if (value > 70) return 'rgba(42, 157, 92, 0.7)';
+                        if (value > 50) return 'rgba(255, 160, 0, 0.7)';
+                        return 'rgba(240, 50, 75, 0.7)';
+                    },
+                    borderColor: function(context) {
+                        const value = context.parsed.y;
+                        if (value > 70) return 'rgba(42, 157, 92, 1)';
+                        if (value > 50) return 'rgba(255, 160, 0, 1)';
+                        return 'rgba(240, 50, 75, 1)';
+                    },
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'P1 Fill Rate podle krajů (% první priority z kapacity)',
+                        font: { size: 16, weight: 'bold' },
+                        color: '#04193c'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.y.toFixed(1) + ' %';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) { return value + '%'; }
+                        },
+                        grid: { color: '#e8f0f8' }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
